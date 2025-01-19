@@ -11,7 +11,9 @@
     <title>Afegir Muntanya</title>
 </head>
 <body>
-    <h1>Afegir una nova muntanya</h1>
+<h1>Afegir una nova muntanya</h1>
+
+<div class="form-container">
     <form action="processa_muntanyes.php" method="post">
     <label for="nom_muntanya">Nom de la muntanya:</label>
     <input type="text" id="nom_muntanya" name="nom_muntanya" required>
@@ -41,7 +43,13 @@
     <input type="url" id="foto_muntanya" name="foto_muntanya" placeholder="https://ejemplo.com/foto.jpg">
 
     <button type="submit">Afegir muntanya</button>
-</form>
-    <a href="index.php">Tornar a la llista</a>
+
+    <a href="index.php">Tornar a la llista</>
+
+    </form>
+
+</div>
+
+
 </body>
 </html>

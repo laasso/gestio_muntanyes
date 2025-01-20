@@ -1,20 +1,40 @@
 <?php
 session_start();
 
-// Verificar si existe una variable de sesión para las montañas
 if (!isset($_SESSION['muntanyes'])) {
     $_SESSION['muntanyes'] = [];
 }
 
-// Aplicar filtro si se envía el formulario
-$filtroAltura = null;
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['altura_minima'])) {
-    $filtroAltura = (int)$_POST['altura_minima'];
-    $montanasFiltradas = array_filter($_SESSION['muntanyes'], function ($muntanya) use ($filtroAltura) {
-        return $muntanya['altura'] >= $filtroAltura;
+$accion = $_POST['accion'] ?? '';
+$montanasFiltradas = $_SESSION['muntanyes'];
+
+if ($accion === 'ordenar_altura') {
+    usort($montanasFiltradas, function ($a, $b) {
+        return $b['altura'] <=> $a['altura'];
     });
-} else {
-    $montanasFiltradas = $_SESSION['muntanyes'];
+} elseif ($accion === 'ordenar_nombre') {
+    usort($montanasFiltradas, function ($a, $b) {
+        return strcasecmp($a['nom_muntanya'], $b['nom_muntanya']);
+    });
+} elseif ($accion === 'filtrar') {
+    $activitatsSeleccionades = $_POST['activitats'] ?? [];
+    if (!empty($activitatsSeleccionades)) {
+        $montanasFiltradas = array_filter($montanasFiltradas, function ($muntanya) use ($activitatsSeleccionades) {
+            foreach ($activitatsSeleccionades as $activitat) {
+                if (strpos($muntanya['activitats'], $activitat) !== false) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    if (!empty($_POST['dificultat'])) {
+        $dificultatSeleccionada = $_POST['dificultat'];
+        $montanasFiltradas = array_filter($montanasFiltradas, function ($muntanya) use ($dificultatSeleccionada) {
+            return $muntanya['dificultat'] === $dificultatSeleccionada;
+        });
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -32,12 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['altura_minima'])) {
     <h1>Gestión de Montañas</h1>
     <a href="add_muntanyes.php" class="add-button">Añadir nueva montaña</a>
 
-    <!-- Formulario para el filtro -->
-    <form method="POST">
-        <label for="altura_minima">Filtrar por altura mínima (metros):</label>
-        <input type="number" name="altura_minima" id="altura_minima" value="<?= htmlspecialchars($filtroAltura) ?>" min="0" placeholder="Ejemplo: 2000">
-        <button type="submit">Aplicar filtro</button>
-    </form>
 
     <ul>
         <?php if (!empty($montanasFiltradas)): ?>
@@ -57,8 +71,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['altura_minima'])) {
                 </li>
             <?php endforeach; ?>
         <?php else: ?>
-            <p>No hay montañas registradas que cumplan con el filtro. <a href="add_muntanyes.php">Añade una aquí</a>.</p>
+            <p>No hay montañas registradas o no cumplen con los filtros. <a href="add_muntanyes.php">Añade una aquí</a>.</p>
         <?php endif; ?>
     </ul>
+
+    <form method="POST">
+        <button type="submit" name="accion" value="ordenar_altura">Ordenar por Altura</button>
+        <button type="submit" name="accion" value="ordenar_nombre">Ordenar por Nombre</button>
+
+        <h3>Filtrar por Actividades</h3>
+        <label for="senderisme">Senderisme</label>
+        <input type="checkbox" id="senderisme" name="activitats[]" value="senderisme">
+        <label for="escalada">Escalada</label>
+        <input type="checkbox" id="escalada" name="activitats[]" value="escalada">
+        <label for="fotografia">Fotografia</label>
+        <input type="checkbox" id="fotografia" name="activitats[]" value="fotografia">
+
+        <h3>Filtrar por Dificultad</h3>
+        <label for="dificultat">Nivell de dificultat:</label>
+        <select id="dificultat" name="dificultat">
+            <option value="">--Seleccione una opción--</option>
+            <option value="facil">Fàcil</option>
+            <option value="moderat">Moderat</option>
+            <option value="dificil">Difícil</option>
+        </select>
+
+        <button type="submit" name="accion" value="filtrar">Aplicar Filtros</button>
+    </form>
+
 </body>
 </html>

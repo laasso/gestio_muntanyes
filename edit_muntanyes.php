@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Verificar si la montaña existe
 $id = $_GET['id'] ?? '';
 if (!$id || !isset($_SESSION['muntanyes'][$id])) {
     header('Location: index.php');
@@ -56,10 +55,12 @@ $muntanya = $_SESSION['muntanyes'][$id];
         <input type="checkbox" id="escalada" name="activitats[]" value="escalada" <?= strpos($muntanya['activitats'], 'escalada') !== false ? 'checked' : '' ?>>
         <label for="escalada">Escalada</label>
         <br>
-        <input type="checkbox" id="fotografia" name="activitats[]" value="fotografia" <?= strpos($muntanya['activitats'], 'fotografia') !== false ? 'checked' : '' ?>>
+        <input type="checkbox" id="fotografia" name="activitats[]" value="fotografia" <?= strpos($muntanya['activitats'], needle: 'fotografia') !== false ? 'checked' : '' ?>>
         <label for="fotografia">Fotografia</label>
+        <br>
+        <label for="imatge_url">URL de la imatge:</label>
+        <input type="url" id="imatge_url" name="imatge_url" value="<?= htmlspecialchars($muntanya['imatge_url']) ?>">
         <br><br>
-
         <button type="submit">Guardar canvis</button>
     </form>
     <a href="index.php">Tornar a la llista</a>
